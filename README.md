@@ -22,7 +22,7 @@ Gemini Query features an efficient local caching system designed to save your AP
 
 ## 🚀 Installation
 
-1. Install the plasmoid via the Plasma "Add Widgets" menu or by downloading the package from store.kde.org.
+1. Download [geminiQuery.plasmoid](geminiQuery.plasmoid) and run `kpackagetool6 -t Plasma/Applet -i geminiQuery.plasmoid`
 2. Obtain a free API Key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 3. Configure your desired question and select your preferred model.
 4. Enjoy your AI-powered desktop!
