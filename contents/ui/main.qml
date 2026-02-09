@@ -37,18 +37,25 @@ PlasmoidItem {
     
     // Funzione per verificare se serve un refresh
     function needsRefresh() {
-        var today = new Date().toDateString()
-        return cacheDate !== today || cachedResponse === ""
+        if (!cacheDate || cachedResponse === "") return true;
+        
+        var now = new Date();
+        var cached = new Date(cacheDate);
+        
+        // Verifica se è un giorno diverso
+        return now.getFullYear() !== cached.getFullYear() || 
+               now.getMonth() !== cached.getMonth() || 
+               now.getDate() !== cached.getDate();
     }
     
     // Funzione per salvare la cache
     function saveCache(response) {
         let now = new Date();
-        let dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString();
+        let dateIso = now.toISOString();
         cachedResponse = response;
-        cacheDate = dateStr;
+        cacheDate = dateIso;
         plasmoid.configuration.cachedResponse = response;
-        plasmoid.configuration.cacheDate = dateStr;
+        plasmoid.configuration.cacheDate = dateIso;
     }
     
     // Funzione per invalidare la cache e ricaricare
@@ -67,6 +74,16 @@ PlasmoidItem {
     function loadCache() {
         cachedResponse = plasmoid.configuration.cachedResponse || ""
         cacheDate = plasmoid.configuration.cacheDate || ""
+    }
+    
+    // Helper per formattare la data della cache
+    function formatCacheDate(isoString) {
+        if (!isoString) return "";
+        let d = new Date(isoString);
+        if (isNaN(d.getTime())) return isoString; // Fallback per vecchie date salvate come stringhe locali
+        
+        return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) + ", " + 
+               d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     }
     
     // Funzione per interrogare Gemini
@@ -208,7 +225,7 @@ PlasmoidItem {
         QQC2.Label {
             Layout.fillWidth: true
             visible: cacheDate !== ""
-            text: i18n("Cache from: %1", cacheDate)
+            text: i18n("Cache from: %1", formatCacheDate(cacheDate))
             font.pointSize: Kirigami.Theme.smallFont.pointSize
             opacity: 0.6
             horizontalAlignment: Text.AlignRight
