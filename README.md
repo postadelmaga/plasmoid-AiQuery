@@ -2,6 +2,8 @@
 
 **Gemini Query** is a lightweight KDE Plasma 6 widget that brings the intelligence of Google Gemini directly to your desktop. Designed for daily insights, motivational quotes, or quick technical facts, it performs recurring queries and keeps the results beautifully rendered on your panel or desktop.
 
+![image showing main widget face](./examples/main.png) 
+
 ## ✨ Features
 
 - **Latest Model Support**: Select from a wide range of Gemini models, including the cutting-edge **Gemini 2.5** and **Gemini 3 Preview**.
@@ -24,6 +26,8 @@ Gemini Query features an efficient local caching system designed to save your AP
 2. Obtain a free API Key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 3. Configure your desired question and select your preferred model.
 4. Enjoy your AI-powered desktop!
+
+![image showing configuration window](./examples/config.png)
 
 ---
 
