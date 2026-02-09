@@ -8,6 +8,7 @@
 
 - **Latest Model Support**: Select from a wide range of Gemini models, including the cutting-edge **Gemini 2.5** and **Gemini 3 Preview**.
 - **Rich Markdown Rendering**: Responses are rendered with full Markdown support, including headers, bold text, lists, and links.
+- **Google Search Grounding**: Toggle **Google Search** in settings to allow Gemini to provide up-to-date information by searching the web.
 - **Customizable Experience**: 
     - Set a custom title for the widget (e.g. "Quote of the Day").
     - Hide or show the original question to keep the interface clean.

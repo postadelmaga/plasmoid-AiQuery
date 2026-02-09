@@ -2,7 +2,7 @@
 
 .pragma library
 
-function queryGemini(apiKey, model, question, callback) {
+function queryGemini(apiKey, model, question, googleSearchEnabled, callback) {
     var xhr = new XMLHttpRequest();
 
     // Endpoint API di Gemini
@@ -16,6 +16,13 @@ function queryGemini(apiKey, model, question, callback) {
             }]
         }]
     };
+
+    // Aggiungi Google Search Grounding se abilitato
+    if (googleSearchEnabled) {
+        payload["tools"] = [{
+            "google_search": {}
+        }];
+    }
 
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {

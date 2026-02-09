@@ -19,6 +19,9 @@ PlasmoidItem {
     property string question: plasmoid.configuration.question
     onQuestionChanged: invalidateCacheAndReload()
     
+    property bool googleSearchEnabled: plasmoid.configuration.googleSearchEnabled
+    onGoogleSearchEnabledChanged: invalidateCacheAndReload()
+    
     property string cachedResponse: ""
     property string cacheDate: ""
     property string statusText: ""
@@ -119,7 +122,7 @@ PlasmoidItem {
         loading = true
         statusText = i18n("Loading...")
         
-        Gemini.queryGemini(apiKey, geminiModel, question, function(success, response) {
+        Gemini.queryGemini(apiKey, geminiModel, question, googleSearchEnabled, function(success, response) {
             loading = false
             if (success) {
                 statusText = ""

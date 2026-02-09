@@ -13,6 +13,7 @@ Item {
     property alias cfg_question: questionField.text
     property alias cfg_cachedResponse: cachedResponseField.text
     property alias cfg_cacheDate: cacheDateField.text
+    property alias cfg_googleSearchEnabled: googleSearchEnabledCheckBox.checked
     
     Kirigami.FormLayout {
         anchors.fill: parent
@@ -121,10 +122,17 @@ Item {
             Kirigami.FormData.isSection: false
             height: Kirigami.Units.smallSpacing
         }
-        
-        Item {
-            Kirigami.FormData.isSection: false
-            height: Kirigami.Units.smallSpacing
+
+        // Google Search Grounding
+        QQC2.CheckBox {
+            id: googleSearchEnabledCheckBox
+            Kirigami.FormData.label: i18n("Google Search:")
+            text: i18n("Enable Google Search (Grounding)")
+            Layout.fillWidth: true
+            
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.text: i18n("Allow Gemini to search the web for up-to-date information.")
+            QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
         }
         
         Item {
