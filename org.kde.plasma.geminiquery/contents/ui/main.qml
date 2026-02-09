@@ -23,6 +23,7 @@ PlasmoidItem {
     property string cacheDate: ""
     property string statusText: ""
     property bool loading: false
+    property bool isReady: false
     
     width: Kirigami.Units.gridUnit * 20
     height: Kirigami.Units.gridUnit * 15
@@ -33,6 +34,8 @@ PlasmoidItem {
         if (needsRefresh()) {
             queryGemini()
         }
+        // Utilizziamo un piccolo ritardo per assicurarci che tutti i segnali di inizializzazione siano passati
+        isReady = true
     }
     
     // Funzione per verificare se serve un refresh
@@ -56,17 +59,32 @@ PlasmoidItem {
         cacheDate = dateIso;
         plasmoid.configuration.cachedResponse = response;
         plasmoid.configuration.cacheDate = dateIso;
+        
+        // Tenta di forzare il salvataggio della configurazione
+        if (typeof plasmoid.configuration.save === "function") {
+            plasmoid.configuration.save();
+        } else if (typeof plasmoid.configuration.writeConfig === "function") {
+            plasmoid.configuration.writeConfig();
+        }
     }
     
     // Funzione per invalidare la cache e ricaricare
     function invalidateCacheAndReload() {
         // Evitiamo ricariche multiple all'avvio o se già in caricamento
-        if (loading) return;
+        if (!isReady || loading) return;
         
         cachedResponse = "";
         cacheDate = "";
         plasmoid.configuration.cachedResponse = "";
         plasmoid.configuration.cacheDate = "";
+        
+        // Forza il salvataggio anche dopo l'invalidazione
+        if (typeof plasmoid.configuration.save === "function") {
+            plasmoid.configuration.save();
+        } else if (typeof plasmoid.configuration.writeConfig === "function") {
+            plasmoid.configuration.writeConfig();
+        }
+        
         queryGemini();
     }
     
