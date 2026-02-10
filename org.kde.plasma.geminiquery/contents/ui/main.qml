@@ -11,6 +11,8 @@ import "../code/gemini.js" as Gemini
 PlasmoidItem {
     id: root
     
+    Plasmoid.icon: "applications-education-science"
+    
     property string apiKey: plasmoid.configuration.apiKey
     property string widgetTitle: plasmoid.configuration.widgetTitle
     property string geminiModel: plasmoid.configuration.geminiModel
@@ -135,15 +137,11 @@ PlasmoidItem {
     
     // Interfaccia compatta (icona nel pannello)
     compactRepresentation: Item {
-        Layout.fillWidth: false
-        Layout.fillHeight: false
-        Layout.minimumWidth: Kirigami.Units.iconSizes.small
-        Layout.minimumHeight: Kirigami.Units.iconSizes.small
-        
+
         Kirigami.Icon {
             id: icon
             anchors.fill: parent
-            source: "brain"
+            source: plasmoid.icon
             active: compactMouse.containsMouse
             
             MouseArea {
