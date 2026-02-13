@@ -7,6 +7,7 @@ import org.kde.plasma.components as PlasmaComponents
 import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg
 import "../code/gemini.js" as Gemini
+import "../code/openrouter.js" as OpenRouter
 
 PlasmoidItem {
     id: root
@@ -16,7 +17,13 @@ PlasmoidItem {
     property string apiKey: plasmoid.configuration.apiKey
     property string widgetTitle: plasmoid.configuration.widgetTitle
     property string geminiModel: plasmoid.configuration.geminiModel
+    property string provider: plasmoid.configuration.provider
+    property string openRouterApiKey: plasmoid.configuration.openRouterApiKey
+    property string openRouterModel: plasmoid.configuration.openRouterModel
+
     onGeminiModelChanged: invalidateCacheAndReload()
+    onProviderChanged: invalidateCacheAndReload()
+    onOpenRouterModelChanged: invalidateCacheAndReload()
     
     property string question: plasmoid.configuration.question
     onQuestionChanged: invalidateCacheAndReload()
@@ -29,6 +36,7 @@ PlasmoidItem {
     
     property string cachedResponse: ""
     property string cacheDate: ""
+    property string cachedModel: ""
     property string statusText: ""
     property bool loading: false
     property bool isReady: false
@@ -40,7 +48,7 @@ PlasmoidItem {
     Component.onCompleted: {
         loadCache()
         if (needsRefresh()) {
-            queryGemini()
+            queryAI()
         }
         // Utilizziamo un piccolo ritardo per assicurarci che tutti i segnali di inizializzazione siano passati
         isReady = true
@@ -60,13 +68,15 @@ PlasmoidItem {
     }
     
     // Funzione per salvare la cache
-    function saveCache(response) {
+    function saveCache(response, modelName) {
         let now = new Date();
         let dateIso = now.toISOString();
         cachedResponse = response;
         cacheDate = dateIso;
+        cachedModel = modelName;
         plasmoid.configuration.cachedResponse = response;
         plasmoid.configuration.cacheDate = dateIso;
+        plasmoid.configuration.cachedModel = modelName;
         
         // Tenta di forzare il salvataggio della configurazione
         if (typeof plasmoid.configuration.save === "function") {
@@ -83,8 +93,10 @@ PlasmoidItem {
         
         cachedResponse = "";
         cacheDate = "";
+        cachedModel = "";
         plasmoid.configuration.cachedResponse = "";
         plasmoid.configuration.cacheDate = "";
+        plasmoid.configuration.cachedModel = "";
         
         // Forza il salvataggio anche dopo l'invalidazione
         if (typeof plasmoid.configuration.save === "function") {
@@ -93,13 +105,14 @@ PlasmoidItem {
             plasmoid.configuration.writeConfig();
         }
         
-        queryGemini();
+        queryAI();
     }
     
     // Funzione per caricare la cache
     function loadCache() {
         cachedResponse = plasmoid.configuration.cachedResponse || ""
         cacheDate = plasmoid.configuration.cacheDate || ""
+        cachedModel = plasmoid.configuration.cachedModel || ""
     }
     
     // Helper per formattare la data della cache
@@ -112,11 +125,19 @@ PlasmoidItem {
                d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
     }
     
-    // Funzione per interrogare Gemini
-    function queryGemini() {
-        if (!apiKey || apiKey === "") {
-            statusText = i18n("Error: API Key not configured.\nGo to settings to configure it.")
-            return
+    // Funzione per interrogare l'AI (Gemini o OpenRouter)
+    function queryAI() {
+        if (provider === "openrouter") {
+             if (!openRouterApiKey || openRouterApiKey === "") {
+                statusText = i18n("Error: OpenRouter API Key not configured.\nGo to settings to configure it.")
+                return
+            }
+        } else {
+            // Default to Google/Gemini
+            if (!apiKey || apiKey === "") {
+                statusText = i18n("Error: Google API Key not configured.\nGo to settings to configure it.")
+                return
+            }
         }
         
         if (!question || question === "") {
@@ -132,15 +153,27 @@ PlasmoidItem {
             fullQuery += "\n\n" + formattingInstructions
         }
         
-        Gemini.queryGemini(apiKey, geminiModel, fullQuery, googleSearchEnabled, function(success, response) {
-            loading = false
-            if (success) {
-                statusText = ""
-                saveCache(response)
-            } else {
-                statusText = i18n("Error: %1", response)
-            }
-        })
+        if (provider === "openrouter") {
+             OpenRouter.queryOpenRouter(openRouterApiKey, openRouterModel, fullQuery, function(success, response) {
+                loading = false
+                if (success) {
+                    statusText = ""
+                    saveCache(response, openRouterModel)
+                } else {
+                    statusText = i18n("Error: %1", response)
+                }
+            })
+        } else {
+            Gemini.queryGemini(apiKey, geminiModel, fullQuery, googleSearchEnabled, function(success, response) {
+                loading = false
+                if (success) {
+                    statusText = ""
+                    saveCache(response, geminiModel)
+                } else {
+                    statusText = i18n("Error: %1", response)
+                }
+            })
+        }
     }
     
     // Interfaccia compatta (icona nel pannello)
@@ -186,7 +219,7 @@ PlasmoidItem {
             Kirigami.Heading {
                 Layout.fillWidth: true
                 level: 3
-                text: widgetTitle !== "" ? widgetTitle : i18n("Gemini Query")
+                text: widgetTitle !== "" ? widgetTitle : i18n("AI Query")
             }
             
             QQC2.ToolButton {
@@ -194,7 +227,7 @@ PlasmoidItem {
                 text: i18n("Refresh")
                 display: QQC2.AbstractButton.IconOnly
                 enabled: !loading
-                onClicked: queryGemini()
+                onClicked: queryAI()
                 
                 QQC2.ToolTip.visible: hovered
                 QQC2.ToolTip.text: i18n("Refresh response")
@@ -234,7 +267,7 @@ PlasmoidItem {
             QQC2.Label {
                 id: responseText
                 width: responseScrollView.availableWidth
-                text: statusText !== "" ? statusText : (cachedResponse !== "" ? cachedResponse : i18n("No response in cache.\nPress 'Refresh' to query Gemini."))
+                text: statusText !== "" ? statusText : (cachedResponse !== "" ? cachedResponse : i18n("No response in cache.\nPress 'Refresh' to query AI."))
                 wrapMode: Text.WordWrap
                 textFormat: Text.MarkdownText
                 onLinkActivated: (link) => Qt.openUrlExternally(link)
@@ -259,7 +292,13 @@ PlasmoidItem {
         QQC2.Label {
             Layout.fillWidth: true
             visible: cacheDate !== ""
-            text: i18n("Cache from: %1", formatCacheDate(cacheDate))
+            text: {
+                var txt = i18n("Cache from: %1", formatCacheDate(cacheDate));
+                if (cachedModel !== "") {
+                    txt = txt + " (" + cachedModel + ")";
+                }
+                return txt;
+            }
             font.pointSize: Kirigami.Theme.smallFont.pointSize
             opacity: 0.6
             horizontalAlignment: Text.AlignRight
