@@ -321,6 +321,8 @@ function fetchData() {
 ## Sources
 
 - [KDE Developer Docs - Widget Properties](https://develop.kde.org/docs/plasma/widget/properties/)
+- [KDE Developer Docs - Configuration](https://develop.kde.org/docs/plasma/widget/configuration/)
+- [KDE Developer Docs - Testing](https://develop.kde.org/docs/plasma/widget/testing/)
 - [KDE Developer Docs - Porting to KF6](https://develop.kde.org/docs/plasma/widget/porting_kf6/)
 - [Zren's Plasma Widget Tutorial](https://zren.github.io/kde/docs/widget/)
 - [KDE plasma-desktop DefaultCompactRepresentation](https://github.com/KDE/plasma-desktop/blob/master/desktoppackage/contents/applet/DefaultCompactRepresentation.qml)
